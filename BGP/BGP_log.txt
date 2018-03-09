@@ -1,0 +1,81 @@
+
+
+
+Настройка AS2
+Router>enable 
+Router#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#ro
+Router(config)#router bgp 219
+Router(config-router)#neighbor 102.0.0.2 remote-as 100
+Router(config-router)#neighbor 102.0.0.10 remote-as 400
+
+
+Настройка ASBR1
+Router>enable 
+Router#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#router bgp 100
+Router(config-router)#neighbor 102.0.0.1 remote-as 219
+
+
+Настройка AS4
+Router>enable 
+Router#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#router bgp 400
+Router(config-router)#neighbor 102.0.0.9 remote-as 219
+
+
+Настройка loopback на AS2
+Router#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#interface loopback 0
+
+Router(config-if)#
+%LINK-5-CHANGED: Interface Loopback0, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Loopback0, changed state to up
+
+Router(config-if)#ip address 102.0.29.1 255.255.255.252
+Router(config-if)#
+%BGP-3-NOTIFICATION: sent to neighbor 102.0.0.2 6/0 (unsupported) 0 bytes 
+
+%BGP-3-NOTIFICATION: sent to neighbor 102.0.0.10 6/0 (unsupported) 0 bytes 
+
+Router(config-if)#ex
+Router(config-if)#exit 
+Router(config)#interface loopback 1
+
+Router(config-if)#
+%LINK-5-CHANGED: Interface Loopback1, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface Loopback1, changed state to up
+
+Router(config-if)#ip address 102.0.30.1 255.255.255.252
+Router(config-if)#%BGP-5-ADJCHANGE: neighbor 102.0.0.10 Up
+%BGP-5-ADJCHANGE: neighbor 102.0.0.2 Up
+
+Router(config-if)#ex
+Router(config-if)#exit 
+Router(config)#router bgp 219
+Router(config-router)#network 102.0.29.0 mask 255.255.255.252
+Router(config-router)#network 102.0.30.0 mask 255.255.255.252
+
+
+Настройка перераспределения внутренних маршрутов наружу на ASBR1
+Router>enable 
+Router#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#router bgp 100
+Router(config-router)#redistribute ospf 1 match external 
+
+
+Выделение отдельной зоны
+Router>enable 
+Router#conf t
+Enter configuration commands, one per line.  End with CNTL/Z.
+Router(config)#router ospf 1
+Router(config-router)#network 214.1.1.0 0.0.0.255 area 1
+Router(config-router)#
+02:30:14: %OSPF-6-AREACHG: 214.1.1.0/0 changed from area 0 to area 1
